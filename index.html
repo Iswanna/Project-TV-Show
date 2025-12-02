@@ -9,29 +9,30 @@
   </head>
 
   <body>
-    <div id="root">
-      <template id="episode-template">
-        <article class="episode-card">
-          <h2 class="episode-title"></h2>
+    <!-- The container where episodes go -->
+    <div id="root"></div>
 
-          <p class="episode-info">
-            Season: <span class="episode-season"></span> | Episode:
-            <span class="episode-number"></span> |
-            <strong class="episode-code"></strong>
-          </p>
+    <!-- The template should be outside the root -->
+    <template id="episode-template">
+      <article class="episode-card">
+        <h2 class="episode-title"></h2>
 
-          <img class="episode-image" alt="Episode image" />
+        <p class="episode-info">
+          Season: <span class="episode-season"></span> | Episode:
+          <span class="episode-number"></span> |
+          <strong class="episode-code"></strong>
+        </p>
 
-          <div class="episode-summary"></div>
+        <img class="episode-image" alt="Episode image" />
 
-          <p class="attribution">
-            Data originally from
-            <a class="episode-link" href="" target="_blank">TVMaze.com</a>
-          </p>
-        </article>
-      </template>
-    </div>
+        <div class="episode-summary"></div>
 
+        <p class="attribution">
+          Data originally from
+          <a class="episode-link" href="" target="_blank">TVMaze.com</a>
+        </p>
+      </article>
+    </template>
     <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
     <script src="episodes.js"></script>
 
