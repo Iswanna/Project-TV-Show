@@ -1,3 +1,69 @@
+/* ========== GLOBAL STYLES ========== */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 20px;
+}
+
+/* ========== CONTAINER GRID ========== */
 #root {
-  color: red;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* ========== EPISODE CARD ========== */
+.episode-card {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Episode image */
+.episode-image {
+  width: 100%;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+/* Episode title */
+.episode-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0 0 8px 0;
+  color: #222;
+}
+
+/* Episode info: season, number, code */
+.episode-info {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+/* Episode summary */
+.episode-summary {
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+/* Attribution */
+.attribution {
+  font-size: 0.8rem;
+  margin-top: auto;
+}
+
+.attribution a {
+  color: #0077cc;
+  text-decoration: none;
+}
+
+.attribution a:hover {
+  text-decoration: underline;
 }
