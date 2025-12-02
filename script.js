@@ -32,12 +32,17 @@ function setup() {
   const episodesToRender = [];
   const episodes = getAllEpisodes();
   const container = document.getElementById("root");
+  const countElement = document.getElementById("episode-count");
+  
   for (const episode of episodes) {
     const episodeCard = makePageForEpisode(episode);
     episodesToRender.push(episodeCard);
   }
 
   container.append(...episodesToRender);
+
+  // Update the episode count
+  countElement.textContent = `Showing ${episodes.length} episodes`;
 }
 
 // When the whole page finishes loading, run the function called setup.
