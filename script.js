@@ -29,10 +29,15 @@ function makePageForEpisode(episodeData) {
 }
 
 function setup() {
-  const episode = getOneEpisode();
-  const episodeCard = makePageForEpisode(episode);
+  const episodesToRender = [];
+  const episodes = getAllEpisodes();
+  const container = document.getElementById("root");
+  for (const episode of episodes) {
+    const episodeCard = makePageForEpisode(episode);
+    episodesToRender.push(episodeCard);
+  }
 
-  document.body.appendChild(episodeCard);
+  container.append(...episodesToRender);
 }
 
 // When the whole page finishes loading, run the function called setup.
