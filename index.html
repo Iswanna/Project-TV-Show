@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -10,6 +10,26 @@
 
   <body>
     <div id="root">
+      <template id="episode-template">
+        <article class="episode-card">
+          <h2 class="episode-title"></h2>
+
+          <p class="episode-info">
+            Season: <span class="episode-season"></span> | Episode:
+            <span class="episode-number"></span> |
+            <strong class="episode-code"></strong>
+          </p>
+
+          <img class="episode-image" alt="Episode image" />
+
+          <div class="episode-summary"></div>
+
+          <p class="attribution">
+            Data originally from
+            <a class="episode-link" href="" target="_blank">TVMaze.com</a>
+          </p>
+        </article>
+      </template>
     </div>
 
     <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
