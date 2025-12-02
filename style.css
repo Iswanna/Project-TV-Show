@@ -36,7 +36,10 @@ body {
   font-weight: bold;
   margin: 0 0 8px 0;
   color: #222;
+  min-height: 2.5em;  /* fixed height for all titles */
+  overflow: hidden;   /* hide overflow if title is too long */
 }
+
 
 /* Episode info: season, number, code */
 .episode-info {
