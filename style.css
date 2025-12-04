@@ -115,8 +115,8 @@
 
 /* highlight style matching example (pink-ish mark) */
 mark {
-  background: #ffb6d6;
-  color: #000;
+  background: brown;
+  color: #ffffff;
   padding: 0 .15rem;
   border-radius: 2px;
 }
