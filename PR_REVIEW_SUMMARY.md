@@ -1,8 +1,8 @@
 # Code Review Summary: PR #1
 
-**PR Title:** Birmingham | Khor Biel | Sprint 2 | Tv show/patner  
+**PR Title:** Birmingham | Khor Biel | Sprint 2 | Tv show/patner *(Note: "patner" is a typo for "partner" in the original PR)*  
 **Author:** wankoak  
-**Branch:** `tv-show/patner` → `main`  
+**Branch:** `tv-show/patner` → `main` *(typo in branch name)*  
 **Changes:** +257 additions, -79 deletions across 3 files  
 **Status:** Ready for merge (mergeable: true)
 
