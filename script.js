@@ -1,5 +1,20 @@
 //You can edit ALL of the code here
 
+// Declaring global variable
+const state = {
+  films: [],
+  searchTerm: "",
+};
+
+// Store the API endpoint for episodes in a variable
+const endpoint = "https://api.tvmaze.com/shows/82/episodes";
+
+// This statement fetches episode data from the TVMaze API endpoint and returns it as a JSON array
+const fetchFilms = async () => {
+  const response = await fetch(endpoint);
+  return await response.json();
+};
+
 // declare a funcion and define it
 function makePageForEpisode(episodeData) {
   const template = document.getElementById("episode-template");
@@ -29,15 +44,11 @@ function makePageForEpisode(episodeData) {
 }
 
 function setup() {
-  const episodesToRender = [];
-  const episodes = getAllEpisodes();
+  const episodes = state.films;
   const container = document.getElementById("root");
   const countElement = document.getElementById("episode-count");
-  
-  for (const episode of episodes) {
-    const episodeCard = makePageForEpisode(episode);
-    episodesToRender.push(episodeCard);
-  }
+
+  const episodesToRender = episodes.map(makePageForEpisode);
 
   container.append(...episodesToRender);
 
@@ -45,5 +56,10 @@ function setup() {
   countElement.textContent = `Showing ${episodes.length} episodes`;
 }
 
-// When the whole page finishes loading, run the function called setup.
-window.onload = setup;
+// Once episode data is fetched asynchronously, update state and trigger UI rendering
+// The .then() method is attached to the Promise returned by fetchFilms().
+// .then() is used to specify what should happen after the Promise resolves (that is, after the data is fetched from the API).
+fetchFilms().then(function (films) {
+  state.films = films;
+  setup();
+});
