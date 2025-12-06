@@ -11,10 +11,7 @@ function escapeRegExp(string) {
 }
 
 function formatEpisodeCode(season, number) {
-  return `S${String(season).padStart(2, "0")}E${String(number).padStart(
-    2,
-    "0"
-  )}`;
+  return `S${String(season).padStart(2, "0")}E${String(number).padStart(2, "0")}`;
 }
 
 // Wrap matches with <mark>, safe for plain text input
@@ -98,65 +95,118 @@ function updateCountDisplay(currentCount, total) {
   el.textContent = `Displaying ${currentCount}/${total} episodes.`;
 }
 
-function setup() {
-  const episodes = getAllEpisodes(); // from episodes.js
-  const total = episodes.length;
-  const allEpisodes = [...episodes];
+// New global state to replace episodes.js
+const state = {
+  episodes: [],
+  loaded: false,
+  error: "",
+};
 
-  populateSelector(allEpisodes);
-  renderEpisodes(allEpisodes, "");
-  updateCountDisplay(allEpisodes.length, total);
+const endpoint = "https://api.tvmaze.com/shows/82/episodes";
 
-  const searchInput = document.getElementById("search");
-  const select = document.getElementById("episode-select");
-
-  function applySearchAndRender() {
-    const term = searchInput.value.trim();
-    if (term === "") {
-      renderEpisodes(allEpisodes, "");
-      updateCountDisplay(allEpisodes.length, total);
-      select.value = "all";
-      return;
-    }
-    const lower = term.toLowerCase();
-    const filtered = allEpisodes.filter((ep) => {
-      const name = (ep.name || "").toLowerCase();
-      const summary = stripHtml(ep.summary).toLowerCase();
-      return name.includes(lower) || summary.includes(lower);
+// Level 300: fetch episodes from API, handle loading, error, and only do this ONCE.
+function fetchEpisodes() {
+  state.loaded = false;
+  state.error = "";
+  return fetch(endpoint)
+    .then((response) => {
+      if (!response.ok) throw new Error(`API error ${response.status}`);
+      return response.json();
+    })
+    .then((data) => {
+      state.episodes = data;
+      state.loaded = true;
+      return data;
+    })
+    .catch((err) => {
+      state.error = "Failed to load episode data. Please try again later.";
+      state.loaded = true;
+      return [];
     });
-    renderEpisodes(filtered, term);
-    updateCountDisplay(filtered.length, total);
-    select.value = "all";
+}
+
+// Render loading or error if appropriate
+function renderStatus() {
+  const container = document.getElementById("root");
+  container.innerHTML = "";
+  const displayCount = document.getElementById("display-count");
+  if (!state.loaded) {
+    container.innerHTML = "<h3>Loading episodes...</h3>";
+    displayCount.textContent = "";
+  } else if (state.error) {
+    container.innerHTML = `<h3 style="color: red;">${state.error}</h3>`;
+    displayCount.textContent = "";
   }
+}
 
-  // live search (immediate per keystroke)
-  searchInput.addEventListener("input", applySearchAndRender);
+// MAIN setup function (runs after DOM loaded)
+function setup() {
+  renderStatus(); // show loading initially
 
-  // selector behaviour — show only selected episode (bonus)
-  select.addEventListener("change", (e) => {
-    const val = e.target.value;
-    if (val === "all") {
-      renderEpisodes(allEpisodes, "");
-      updateCountDisplay(allEpisodes.length, total);
+  fetchEpisodes().then(() => {
+    if (state.error) {
+      renderStatus();
+      return;
+    }
+    const episodes = state.episodes;
+    const total = episodes.length;
+    const allEpisodes = [...episodes];
+
+    populateSelector(allEpisodes);
+    renderEpisodes(allEpisodes, "");
+    updateCountDisplay(allEpisodes.length, total);
+
+    const searchInput = document.getElementById("search");
+    const select = document.getElementById("episode-select");
+
+    function applySearchAndRender() {
+      const term = searchInput.value.trim();
+      if (term === "") {
+        renderEpisodes(allEpisodes, "");
+        updateCountDisplay(allEpisodes.length, total);
+        select.value = "all";
+        return;
+      }
+      const lower = term.toLowerCase();
+      const filtered = allEpisodes.filter((ep) => {
+        const name = (ep.name || "").toLowerCase();
+        const summary = stripHtml(ep.summary).toLowerCase();
+        return name.includes(lower) || summary.includes(lower);
+      });
+      renderEpisodes(filtered, term);
+      updateCountDisplay(filtered.length, total);
+      select.value = "all";
+    }
+
+    // live search (immediate per keystroke)
+    searchInput.addEventListener("input", applySearchAndRender);
+
+    // selector behaviour — show only selected episode (bonus)
+    select.addEventListener("change", (e) => {
+      const val = e.target.value;
+      if (val === "all") {
+        renderEpisodes(allEpisodes, "");
+        updateCountDisplay(allEpisodes.length, total);
+        searchInput.value = "";
+        return;
+      }
+      const chosen = allEpisodes.find(
+        (ep) => formatEpisodeCode(ep.season, ep.number) === val
+      );
+      if (!chosen) {
+        renderEpisodes(allEpisodes, "");
+        updateCountDisplay(allEpisodes.length, total);
+        return;
+      }
+      renderEpisodes([chosen], ""); // no highlight by default when selecting
+      updateCountDisplay(1, total);
       searchInput.value = "";
-      return;
-    }
-    const chosen = allEpisodes.find(
-      (ep) => formatEpisodeCode(ep.season, ep.number) === val
-    );
-    if (!chosen) {
-      renderEpisodes(allEpisodes, "");
-      updateCountDisplay(allEpisodes.length, total);
-      return;
-    }
-    renderEpisodes([chosen], ""); // no highlight by default when selecting
-    updateCountDisplay(1, total);
-    searchInput.value = "";
-    // scroll into view
-    setTimeout(() => {
-      const el = document.getElementById(`episode-${val}`);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 30);
+      // scroll into view
+      setTimeout(() => {
+        const el = document.getElementById(`episode-${val}`);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 30);
+    });
   });
 }
 
