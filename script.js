@@ -25,7 +25,23 @@ function highlightText(text, term) {
   return text.replace(re, (match) => `<mark>${match}</mark>`);
 }
 
-function makePageForEpisode(episodeData, highlightTerm = "") {
+// Declaring global variable
+const state = {
+  films: [],
+  searchTerm: "",
+};
+
+// Store the API endpoint for episodes in a variable
+const endpoint = "https://api.tvmaze.com/shows/82/episodes";
+
+// This statement fetches episode data from the TVMaze API endpoint and returns it as a JSON array
+const fetchFilms = async () => {
+  const response = await fetch(endpoint);
+  return await response.json();
+};
+
+// declare a funcion and define it
+function makePageForEpisode(episodeData) {
   const template = document.getElementById("episode-template");
   const card = template.content.cloneNode(true);
 
@@ -71,63 +87,12 @@ function makePageForEpisode(episodeData, highlightTerm = "") {
   return card;
 }
 
-function renderEpisodes(episodesArray, highlightTerm = "") {
+function renderEpisodes() {
+  const episodes = state.films;
   const container = document.getElementById("root");
-  container.innerHTML = "";
-  const frag = document.createDocumentFragment();
-  for (const ep of episodesArray) {
-    frag.appendChild(makePageForEpisode(ep, highlightTerm));
-  }
-  container.appendChild(frag);
-}
+  const countElement = document.getElementById("episode-count");
 
-function populateSelector(episodes) {
-  const select = document.getElementById("episode-select");
-  select.innerHTML = '<option value="all">All episodes</option>';
-  for (const ep of episodes) {
-    const code = formatEpisodeCode(ep.season, ep.number);
-    const opt = document.createElement("option");
-    opt.value = code;
-    opt.textContent = `${code} - ${ep.name}`;
-    select.appendChild(opt);
-  }
-}
-
-function updateCountDisplay(currentCount, total) {
-  const el = document.getElementById("display-count");
-  el.textContent = `Displaying ${currentCount}/${total} episodes.`;
-}
-
-function setup() {
-  const episodes = getAllEpisodes(); // from episodes.js
-  const total = episodes.length;
-  const allEpisodes = [...episodes];
-
-  populateSelector(allEpisodes);
-  renderEpisodes(allEpisodes, "");
-  updateCountDisplay(allEpisodes.length, total);
-
-  const searchInput = document.getElementById("search");
-  const select = document.getElementById("episode-select");
-
-  function applySearchAndRender() {
-    const term = searchInput.value.trim();
-    if (term === "") {
-      renderEpisodes(allEpisodes, "");
-      updateCountDisplay(allEpisodes.length, total);
-      select.value = "all";
-      return;
-    }
-    const lower = term.toLowerCase();
-    const filtered = allEpisodes.filter((ep) => {
-      const name = (ep.name || "").toLowerCase();
-      const summary = stripHtml(ep.summary).toLowerCase();
-      return name.includes(lower) || summary.includes(lower);
-    });
-    renderEpisodes(filtered, term);
-    updateCountDisplay(filtered.length, total);
-    select.value = "all";
-  }
+  const episodesToRender = episodes.map(makePageForEpisode);
 
   // live search (immediate per keystroke)
   searchInput.addEventListener("input", applySearchAndRender);
@@ -160,4 +125,10 @@ function setup() {
   });
 }
 
-window.onload = setup;
+// Once episode data is fetched asynchronously, update state and trigger UI rendering
+// The .then() method is attached to the Promise returned by fetchFilms().
+// .then() is used to specify what should happen after the Promise resolves (that is, after the data is fetched from the API).
+fetchFilms().then(function (films) {
+  state.films = films;
+  renderEpisodes();
+});
