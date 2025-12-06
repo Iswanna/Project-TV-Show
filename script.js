@@ -43,7 +43,7 @@ function makePageForEpisode(episodeData) {
   return card;
 }
 
-function setup() {
+function renderEpisodes() {
   const episodes = state.films;
   const container = document.getElementById("root");
   const countElement = document.getElementById("episode-count");
@@ -61,5 +61,5 @@ function setup() {
 // .then() is used to specify what should happen after the Promise resolves (that is, after the data is fetched from the API).
 fetchFilms().then(function (films) {
   state.films = films;
-  setup();
+  renderEpisodes();
 });
