@@ -10,23 +10,30 @@
 
   <body>
     <header class="site-header">
-  <div class="controls-row">
-    <div class="left-controls">
-      <label for="search" class="visually-hidden">Search episodes</label>
-      <input id="search" type="search" placeholder="Search by name or summary..." />
-    </div>
+      <div class="controls-row">
+        <div class="left-controls">
+          <label for="search" class="visually-hidden">Search episodes</label>
+          <input
+            id="search"
+            type="search"
+            placeholder="Search by name or summary..."
+          />
+        </div>
 
-    <div class="center-count" id="display-count">Displaying 0/0 episodes.</div>
+        <div class="center-count" id="display-count">
+          Displaying 0/0 episodes.
+        </div>
 
-    <div class="right-controls">
-      <label for="episode-select" class="visually-hidden">Episode select</label>
-      <select id="episode-select">
-        <option value="all">All episodes</option>
-      </select>
-    </div>
-  </div>
-</header>
-
+        <div class="right-controls">
+          <label for="episode-select" class="visually-hidden"
+            >Episode select</label
+          >
+          <select id="episode-select">
+            <option value="all">All episodes</option>
+          </select>
+        </div>
+      </div>
+    </header>
 
     <!-- The container where episodes go -->
     <div id="root"></div>
@@ -52,8 +59,6 @@
         </p>
       </article>
     </template>
-    <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
-    <script src="episodes.js"></script>
 
     <!-- Loads YOUR javascript code -->
     <script src="script.js"></script>
