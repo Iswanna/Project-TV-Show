@@ -1,66 +1,62 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TV Show Project | Iswat Bello (Iswanna)</title>
-    <link href="style.css" rel="stylesheet" />
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>TV Show Project</title>
+    <!-- Google font for bold condensed header look similar to screenshot -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Open+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
     <header class="site-header">
       <div class="controls-row">
         <div class="left-controls">
-          <label for="search" class="visually-hidden">Search episodes</label>
-          <input
-            id="search"
-            type="search"
-            placeholder="Search by name or summary..."
-          />
+          <label for="show-select" class="visually-hidden">Select show</label>
+          <select id="show-select" class="control-select">
+            <option value="">Loading shows...</option>
+          </select>
         </div>
 
-        <div class="center-count" id="display-count">
-          Displaying 0/0 episodes.
+        <div class="mid-controls">
+          <label for="episode-select" class="visually-hidden">Episode select</label>
+          <select id="episode-select" class="control-select">
+            <option value="all">S01E01 - Pilot</option>
+          </select>
+
+          <label for="search" class="visually-hidden">Search episodes</label>
+          <input id="search" class="control-search" type="search" placeholder="your search term ..." />
         </div>
 
         <div class="right-controls">
-          <label for="episode-select" class="visually-hidden"
-            >Episode select</label
-          >
-          <select id="episode-select">
-            <option value="all">All episodes</option>
-          </select>
+          <div id="display-count" class="display-count">Displaying 0/0 episodes.</div>
         </div>
       </div>
     </header>
 
-    <!-- The container where episodes go -->
-    <div id="root"></div>
+    <main>
+      <div id="root" class="cards-grid"></div>
+    </main>
 
-    <!-- The template should be outside the root -->
     <template id="episode-template">
       <article class="episode-card">
-        <h2 class="episode-title"></h2>
+        <div class="card-header">
+          <h2 class="episode-title"></h2>
+        </div>
 
-        <p class="episode-info">
-          Season: <span class="episode-season"></span> | Episode:
-          <span class="episode-number"></span> |
-          <strong class="episode-code"></strong>
-        </p>
-
-        <img class="episode-image" alt="Episode image" />
-
-        <div class="episode-summary"></div>
+        <div class="card-body">
+          <img class="episode-image" alt="Episode image" />
+          <div class="episode-summary"></div>
+        </div>
 
         <p class="attribution">
-          Data originally from
-          <a class="episode-link" href="" target="_blank">TVMaze.com</a>
+          Data originally from <a class="episode-link" href="" target="_blank">TVMaze</a>
         </p>
       </article>
     </template>
 
-    <!-- Loads YOUR javascript code -->
+    <!-- Remove episodes.js include when using dynamic API -->
     <script src="script.js"></script>
   </body>
 </html>
