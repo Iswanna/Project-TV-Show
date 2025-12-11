@@ -10,10 +10,7 @@ function escapeRegExp(string) {
 }
 
 function formatEpisodeCode(season, number) {
-  return `S${String(season).padStart(2, "0")}E${String(number).padStart(
-    2,
-    "0"
-  )}`;
+  return `S${String(season).padStart(2, "0")}E${String(number).padStart(2, "0")}`;
 }
 
 function highlightText(text, term) {
@@ -29,21 +26,12 @@ function makePageForEpisode(episodeData, highlightTerm = "") {
 
   const code = formatEpisodeCode(episodeData.season, episodeData.number);
   const titleText = `${episodeData.name} - ${code}`;
-  card.querySelector(".episode-title").innerHTML = highlightText(
-    titleText,
-    highlightTerm
-  );
+  card.querySelector(".episode-title").innerHTML = highlightText(titleText, highlightTerm);
 
-  card.querySelector(".episode-summary").innerHTML = `<p>${highlightText(
-    stripHtml(episodeData.summary || "No summary available."),
-    highlightTerm
-  )}</p>`;
+  card.querySelector(".episode-summary").innerHTML = `<p>${highlightText(stripHtml(episodeData.summary || "No summary available."), highlightTerm)}</p>`;
 
   const imgEl = card.querySelector(".episode-image");
-  if (
-    episodeData.image &&
-    (episodeData.image.medium || episodeData.image.original)
-  ) {
+  if (episodeData.image && (episodeData.image.medium || episodeData.image.original)) {
     imgEl.src = episodeData.image.medium || episodeData.image.original;
     imgEl.alt = `${episodeData.name} image`;
   } else {
@@ -62,8 +50,7 @@ function renderEpisodes(episodesArray, highlightTerm = "") {
   const container = document.getElementById("root");
   container.innerHTML = "";
   const frag = document.createDocumentFragment();
-  for (const ep of episodesArray)
-    frag.appendChild(makePageForEpisode(ep, highlightTerm));
+  for (const ep of episodesArray) frag.appendChild(makePageForEpisode(ep, highlightTerm));
   container.appendChild(frag);
 }
 
@@ -107,11 +94,7 @@ function setup() {
     const url = "https://api.tvmaze.com/shows";
     fetchWithCache(url)
       .then((shows) => {
-        shows.sort((a, b) =>
-          (a.name || "")
-            .toLowerCase()
-            .localeCompare((b.name || "").toLowerCase())
-        );
+        shows.sort((a, b) => (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase()));
         showSelect.innerHTML = '<option value="">Select a show...</option>';
         for (const s of shows) {
           const o = document.createElement("option");
@@ -119,7 +102,7 @@ function setup() {
           o.textContent = s.name;
           showSelect.appendChild(o);
         }
-        // auto-select first real show to mimic example (optional)
+       
         if (showSelect.options.length > 1) {
           showSelect.selectedIndex = 1;
           loadEpisodesForShow(showSelect.value);
@@ -127,8 +110,7 @@ function setup() {
       })
       .catch((e) => {
         console.error("Shows load failed", e);
-        showSelect.innerHTML =
-          '<option value="">(Could not load shows)</option>';
+        showSelect.innerHTML = '<option value="">(Could not load shows)</option>';
       });
   }
 
@@ -185,9 +167,7 @@ function setup() {
       searchInput.value = "";
       return;
     }
-    const chosen = allEpisodes.find(
-      (ep) => formatEpisodeCode(ep.season, ep.number) === val
-    );
+    const chosen = allEpisodes.find((ep) => formatEpisodeCode(ep.season, ep.number) === val);
     if (!chosen) {
       renderEpisodes(allEpisodes, "");
       updateCountDisplay(allEpisodes.length, total);
