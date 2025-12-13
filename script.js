@@ -77,9 +77,13 @@ function makePageForEpisode(episodeData, highlightTerm = "") {
     imgEl.alt = "No image available";
   }
 
-  const linkEl = card.querySelector(".episode-link");
-  linkEl.href = episodeData.url || "#";
-  linkEl.target = "_blank";
+  // Set the link wrapper's href
+  const linkWrapper = card.querySelector(".episode-link-wrapper");
+  linkWrapper.href = episodeData.url || "#";
+  
+  // Add cursor pointer style
+  const cardElement = card.querySelector(".episode-card");
+  cardElement.style.cursor = "pointer";
 
   return card;
 }

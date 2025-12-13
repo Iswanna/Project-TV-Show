@@ -104,6 +104,19 @@ body{
   height: 100%;
 }
 
+/* Episode card link wrapper */
+.episode-link-wrapper {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.episode-link-wrapper:hover .episode-card {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
 /* Label styling for better visibility */
 label {
   color: #ffffff; 
