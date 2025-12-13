@@ -1,3 +1,9 @@
+// Global variables for shared state
+let allShows = [];
+let allEpisodes = [];
+let totalEpisodes = 0;
+let currentShowName = "";
+
 function stripHtml(html) {
   if (!html) return "";
   const div = document.createElement("div");
@@ -20,7 +26,7 @@ function highlightText(text, term) {
   return text.replace(re, (match) => `<mark>${match}</mark>`);
 }
 
-// NEW: Create show card
+// Modified to call global function
 function makePageForShow(showData, highlightTerm = "") {
   const template = document.getElementById("show-template");
   const card = template.content.cloneNode(true);
@@ -42,7 +48,7 @@ function makePageForShow(showData, highlightTerm = "") {
   card.querySelector(".show-rating").textContent = showData.rating?.average || "N/A";
   card.querySelector(".show-runtime").textContent = showData.runtime || "N/A";
 
-  // Add click handler
+  // Add click handler - NOW WORKS because loadEpisodesForShow is global
   const cardElement = card.querySelector(".show-card");
   cardElement.style.cursor = "pointer";
   cardElement.addEventListener("click", () => {
@@ -78,7 +84,6 @@ function makePageForEpisode(episodeData, highlightTerm = "") {
   return card;
 }
 
-// NEW: Render shows
 function renderShows(showsArray, highlightTerm = "") {
   const container = document.getElementById("root");
   container.innerHTML = "";
@@ -125,18 +130,48 @@ function fetchWithCache(url) {
   return p;
 }
 
+function showShowsView() {
+  document.getElementById("shows-controls").style.display = "flex";
+  document.getElementById("episodes-controls").style.display = "none";
+}
+
+function showEpisodesView() {
+  document.getElementById("shows-controls").style.display = "none";
+  document.getElementById("episodes-controls").style.display = "flex";
+}
+
+function loadEpisodesForShow(showId, showName) {
+  currentShowName = showName;
+  const epUrl = `https://api.tvmaze.com/shows/${showId}/episodes`;
+  renderEpisodes([], "");
+  updateCountDisplay(0, 0);
+  showEpisodesView();
+  
+  fetchWithCache(epUrl)
+    .then((episodes) => {
+      allEpisodes = Array.isArray(episodes) ? episodes.slice() : [];
+      totalEpisodes = allEpisodes.length;
+      populateEpisodeSelector(allEpisodes);
+      renderEpisodes(allEpisodes, "");
+      updateCountDisplay(allEpisodes.length, totalEpisodes);
+      const searchInput = document.getElementById("search");
+      const episodeSelect = document.getElementById("episode-select");
+      searchInput.value = "";
+      episodeSelect.value = "all";
+    })
+    .catch((err) => {
+      console.error("Episodes load failed", err);
+      renderEpisodes([], "");
+      updateCountDisplay(0, 0);
+    });
+}
+
 function setup() {
   const searchInput = document.getElementById("search");
   const showSearchInput = document.getElementById("show-search");
   const episodeSelect = document.getElementById("episode-select");
   const backButton = document.getElementById("back-to-shows");
 
-  let allShows = [];
-  let allEpisodes = [];
-  let totalEpisodes = 0;
-  let currentShowName = "";
-
-  // NEW: Load and display shows
   function loadShows() {
     const url = "https://api.tvmaze.com/shows";
     fetchWithCache(url)
@@ -151,43 +186,6 @@ function setup() {
       });
   }
 
-  // NEW: Show/hide views
-  function showShowsView() {
-    document.getElementById("shows-controls").style.display = "flex";
-    document.getElementById("episodes-controls").style.display = "none";
-  }
-
-  function showEpisodesView() {
-    document.getElementById("shows-controls").style.display = "none";
-    document.getElementById("episodes-controls").style.display = "flex";
-  }
-
-  // Modified to accept showId and showName
-  function loadEpisodesForShow(showId, showName) {
-    currentShowName = showName;
-    const epUrl = `https://api.tvmaze.com/shows/${showId}/episodes`;
-    renderEpisodes([], "");
-    updateCountDisplay(0, 0);
-    showEpisodesView();
-    
-    fetchWithCache(epUrl)
-      .then((episodes) => {
-        allEpisodes = Array.isArray(episodes) ? episodes.slice() : [];
-        totalEpisodes = allEpisodes.length;
-        populateEpisodeSelector(allEpisodes);
-        renderEpisodes(allEpisodes, "");
-        updateCountDisplay(allEpisodes.length, totalEpisodes);
-        searchInput.value = "";
-        episodeSelect.value = "all";
-      })
-      .catch((err) => {
-        console.error("Episodes load failed", err);
-        renderEpisodes([], "");
-        updateCountDisplay(0, 0);
-      });
-  }
-
-  // NEW: Show search
   function applyShowSearch() {
     const term = showSearchInput.value.trim();
     if (term === "") {
@@ -226,7 +224,6 @@ function setup() {
     episodeSelect.value = "all";
   }
 
-  // Event listeners
   showSearchInput.addEventListener("input", applyShowSearch);
   searchInput.addEventListener("input", applyEpisodeSearch);
 
@@ -257,7 +254,6 @@ function setup() {
     searchInput.value = "";
   });
 
-  // Start by loading shows
   loadShows();
 }
 
