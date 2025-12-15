@@ -184,6 +184,31 @@ label {
   color:#333;
 }
 
+/* Footer attribution */
+.site-footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  border-top: 1px solid var(--card-border);
+  background: #dbeff8;
+}
+
+.site-footer p {
+  margin: 0;
+  font-size: 14px;
+  color: #d10404; /* Changed from #666 to red for better visibility */
+}
+
+.site-footer a {
+  color: #071b24; /* Changed to dark blue for better contrast */
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
+
 /* small devices: 1 column, medium: 2 columns */
 @media (max-width:1100px){
   .cards-grid{ grid-template-columns:repeat(2,1fr); }
