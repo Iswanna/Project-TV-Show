@@ -151,6 +151,9 @@ function loadEpisodesForShow(showId, showName) {
   updateCountDisplay(0, 0);
   showEpisodesView();
   
+  // Add to browser history
+  history.pushState({ view: 'episodes', showId, showName }, '', `#show/${showId}`);
+  
   fetchWithCache(epUrl)
     .then((episodes) => {
       allEpisodes = Array.isArray(episodes) ? episodes.slice() : [];
@@ -176,6 +179,7 @@ function setup() {
   const episodeSelect = document.getElementById("episode-select");
   const backButton = document.getElementById("back-to-shows");
 
+  // Load and display shows
   function loadShows() {
     const url = "https://api.tvmaze.com/shows";
     fetchWithCache(url)
@@ -184,6 +188,11 @@ function setup() {
         renderShows(allShows, "");
         updateCountDisplay(allShows.length, allShows.length, true);
         showShowsView();
+        
+        // Set initial history state
+        if (!history.state) {
+          history.replaceState({ view: 'shows' }, '', '#shows');
+        }
       })
       .catch((e) => {
         console.error("Shows load failed", e);
@@ -228,6 +237,7 @@ function setup() {
     episodeSelect.value = "all";
   }
 
+  // Event listeners
   showSearchInput.addEventListener("input", applyShowSearch);
   searchInput.addEventListener("input", applyEpisodeSearch);
 
@@ -236,6 +246,9 @@ function setup() {
     updateCountDisplay(allShows.length, allShows.length, true);
     showShowsView();
     showSearchInput.value = "";
+    
+    // Add to browser history
+    history.pushState({ view: 'shows' }, '', '#shows');
   });
 
   episodeSelect.addEventListener("change", (e) => {
@@ -258,6 +271,21 @@ function setup() {
     searchInput.value = "";
   });
 
+  // Handle browser back/forward buttons
+  window.addEventListener('popstate', (event) => {
+    if (event.state) {
+      if (event.state.view === 'shows') {
+        renderShows(allShows, "");
+        updateCountDisplay(allShows.length, allShows.length, true);
+        showShowsView();
+        showSearchInput.value = "";
+      } else if (event.state.view === 'episodes') {
+        loadEpisodesForShow(event.state.showId, event.state.showName);
+      }
+    }
+  });
+
+  // Start by loading shows
   loadShows();
 }
 
