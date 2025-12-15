@@ -11,26 +11,38 @@
 
   <body>
     <header class="site-header">
-      <div class="controls-row">
+      <!-- Shows view controls -->
+      <div id="shows-controls" class="controls-row">
         <div class="left-controls">
-          <label for="show-select" class="visually-hidden">Select show</label>
-          <select id="show-select" class="control-select">
-            <option value="">Loading shows...</option>
-          </select>
+          <h1 style="color: white; margin: 0;">TV Shows</h1>
+        </div>
+        <div class="mid-controls">
+          <label for="show-search" class="visually-hidden">Search shows</label>
+          <input id="show-search" class="control-search" type="search" placeholder="Search shows by name, genre, summary..." />
+        </div>
+        <div class="right-controls">
+          <div id="show-display-count" class="display-count">Displaying 0/0 shows</div>
+        </div>
+      </div>
+
+      <!-- Episodes view controls (hidden initially) -->
+      <div id="episodes-controls" class="controls-row" style="display: none;">
+        <div class="left-controls">
+          <button id="back-to-shows" style="padding: 8px 16px; background: #4fc3f7; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">← Back to Shows</button>
         </div>
 
         <div class="mid-controls">
           <label for="episode-select" class="visually-hidden">Episode select</label>
           <select id="episode-select" class="control-select">
-            <option value="all">S01E01 - Pilot</option>
+            <option value="all">All episodes</option>
           </select>
 
           <label for="search" class="visually-hidden">Search episodes</label>
-          <input id="search" class="control-search" type="search" placeholder="your search term ..." />
+          <input id="search" class="control-search" type="search" placeholder="Search episodes..." />
         </div>
 
         <div class="right-controls">
-          <div id="display-count" class="display-count">Displaying 0/0 episodes.</div>
+          <div id="display-count" class="display-count">Displaying 0/0 episodes</div>
         </div>
       </div>
     </header>
@@ -39,24 +51,53 @@
       <div id="root" class="cards-grid"></div>
     </main>
 
-    <template id="episode-template">
-      <article class="episode-card">
+    <!-- Add footer attribution -->
+    <footer class="site-footer">
+      <p>
+        Episode data provided by 
+        <a href="https://www.tvmaze.com/" target="_blank" rel="noopener noreferrer">TVMaze.com</a>
+      </p>
+    </footer>
+
+    <!-- Templates -->
+    <template id="show-template">
+      <article class="episode-card show-card">
         <div class="card-header">
           <h2 class="episode-title"></h2>
         </div>
 
         <div class="card-body">
-          <img class="episode-image" alt="Episode image" />
+          <img class="episode-image" alt="Show image" />
           <div class="episode-summary"></div>
+          <div class="show-details">
+            <p><strong>Genres:</strong> <span class="show-genres"></span></p>
+            <p><strong>Status:</strong> <span class="show-status"></span></p>
+            <p><strong>Rating:</strong> <span class="show-rating"></span></p>
+            <p><strong>Runtime:</strong> <span class="show-runtime"></span> mins</p>
+          </div>
         </div>
-
-        <p class="attribution">
-          Data originally from <a class="episode-link" href="" target="_blank">TVMaze</a>
-        </p>
       </article>
     </template>
 
-    <!-- Remove episodes.js include when using dynamic API -->
+    <template id="episode-template">
+      <a href="#" target="_blank" class="episode-link-wrapper" style="text-decoration: none; color: inherit;">
+        <article class="episode-card">
+          <div class="card-header">
+            <h2 class="episode-title"></h2>
+          </div>
+
+          <div class="card-body">
+            <img class="episode-image" alt="Episode image" />
+            <div class="episode-summary"></div>
+          </div>
+        </article>
+      </a>
+    </template>
+
+    <!-- Back to top button -->
+    <button id="back-to-top" aria-label="Back to top">↑</button>
+
+    <!-- Scripts last -->
     <script src="script.js"></script>
   </body>
 </html>

@@ -1,7 +1,7 @@
 :root{
   --bg:#2b2b2b;
   --panel:#ffffff;
-  --muted:#777;
+  --muted:#555;
   --accent:#e6e6e6;
   --card-border:#dcdcdc;
 }
@@ -77,7 +77,7 @@ body{
   border-radius:6px;
   border:1px solid #cfcfcf;
   font-size:13px;
-  color:#333;
+  color:#111;
   min-width:170px;
   text-align:center;
 }
@@ -87,7 +87,7 @@ body{
   display:grid;
   grid-template-columns:repeat(3, 1fr);
   gap:18px;
-  align-items:start;
+  align-items:stretch;
 }
 
 /* Card */
@@ -101,6 +101,27 @@ body{
   display:flex;
   flex-direction:column;
   min-height:360px;
+  height: 100%;
+}
+
+/* Episode card link wrapper */
+.episode-link-wrapper {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.episode-link-wrapper:hover .episode-card {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+
+/* Label styling for better visibility */
+label {
+  color: #ffffff; 
+  font-weight: 600;
+  font-size: 14px;
 }
 
 /* top header (white rounded rectangle with bold center title) */
@@ -151,7 +172,7 @@ body{
 /* summary text */
 .episode-summary{
   font-size:13px;
-  color:var(--muted);
+  color: #555;
   line-height:1.45;
   text-align:left;
 }
@@ -160,7 +181,67 @@ body{
 .attribution{
   margin:10px 14px;
   font-size:12px;
-  color:#666;
+  color:#333;
+}
+
+/* Footer attribution */
+.site-footer {
+  text-align: center;
+  padding: 20px;
+  margin-top: 40px;
+  border-top: 1px solid var(--card-border);
+  background: #dbeff8;
+}
+
+.site-footer p {
+  margin: 0;
+  font-size: 14px;
+  color: #d10404; /* Changed from #666 to red for better visibility */
+}
+
+.site-footer a {
+  color: #071b24; /* Changed to dark blue for better contrast */
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Back to top button */
+#back-to-top {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 50px;
+  height: 50px;
+  background: #4fc3f7;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.2s ease;
+  z-index: 1000;
+}
+
+#back-to-top.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+#back-to-top:hover {
+  background: #0288d1;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+#back-to-top:active {
+  transform: translateY(-1px);
 }
 
 /* small devices: 1 column, medium: 2 columns */
