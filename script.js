@@ -262,3 +262,23 @@ function setup() {
 }
 
 window.addEventListener("load", setup);
+
+// Back to top button functionality
+const backToTopButton = document.getElementById("back-to-top");
+
+// Show/hide button based on scroll position
+window.addEventListener("scroll", () => {
+  if (window.pageYOffset > 300) {
+    backToTopButton.classList.add("show");
+  } else {
+    backToTopButton.classList.remove("show");
+  }
+});
+
+// Scroll to top when clicked
+backToTopButton.addEventListener("click", () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+});
