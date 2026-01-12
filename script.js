@@ -124,6 +124,64 @@ function updateCountDisplay(currentCount, total, isShows = false) {
 }
 
 const fetchCache = new Map();
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+// Save to localStorage with expiration
+function saveToLocalStorage(key, data) {
+  try {
+    const item = {
+      data: data,
+      timestamp: Date.now(),
+      expiresAt: Date.now() + CACHE_DURATION
+    };
+    localStorage.setItem(key, JSON.stringify(item));
+  } catch (e) {
+    console.error('Failed to save to localStorage', e);
+  }
+}
+
+// Get from localStorage (returns null if expired or not found)
+function getFromLocalStorage(key) {
+  try {
+    const item = localStorage.getItem(key);
+    if (!item) return null;
+    
+    const parsed = JSON.parse(item);
+    
+    // Check if expired
+    if (Date.now() > parsed.expiresAt) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    
+    return parsed.data;
+  } catch (e) {
+    console.error('Failed to get from localStorage', e);
+    return null;
+  }
+}
+
+// Clear expired items from localStorage
+function clearExpiredCache() {
+  try {
+    const keys = Object.keys(localStorage);
+    keys.forEach(key => {
+      const item = localStorage.getItem(key);
+      if (item) {
+        try {
+          const parsed = JSON.parse(item);
+          if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
+            localStorage.removeItem(key);
+          }
+        } catch (e) {
+          // Not our cache item, skip it
+        }
+      }
+    });
+  } catch (e) {
+    console.error('Failed to clear expired cache', e);
+  }
+}
 
 async function fetchWithCache(url) {
   if (fetchCache.has(url)) return fetchCache.get(url);
