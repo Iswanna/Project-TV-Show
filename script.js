@@ -124,14 +124,18 @@ function updateCountDisplay(currentCount, total, isShows = false) {
 }
 
 const fetchCache = new Map();
-function fetchWithCache(url) {
+
+async function fetchWithCache(url) {
   if (fetchCache.has(url)) return fetchCache.get(url);
-  const p = fetch(url).then((r) => {
-    if (!r.ok) throw new Error("Network error");
-    return r.json();
-  });
-  fetchCache.set(url, p);
-  return p;
+  
+  const promise = (async () => {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Network error");
+    return await response.json();
+  })();
+  
+  fetchCache.set(url, promise);
+  return promise;
 }
 
 function showShowsView() {
