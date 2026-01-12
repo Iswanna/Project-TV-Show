@@ -252,6 +252,9 @@ async function loadEpisodesForShow(showId, showName) {
 }
 
 function setup() {
+  // Clear expired cache on startup
+  clearExpiredCache();
+  
   const searchInput = document.getElementById("search");
   const showSearchInput = document.getElementById("show-search");
   const episodeSelect = document.getElementById("episode-select");
