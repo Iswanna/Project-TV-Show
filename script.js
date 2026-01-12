@@ -183,24 +183,23 @@ function setup() {
   const episodeSelect = document.getElementById("episode-select");
   const backButton = document.getElementById("back-to-shows");
 
-  // Load and display shows
-  function loadShows() {
+  // Load and display shows - NOW USING ASYNC/AWAIT
+  async function loadShows() {
     const url = "https://api.tvmaze.com/shows";
-    fetchWithCache(url)
-      .then((shows) => {
-        allShows = shows.sort((a, b) => (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase()));
-        renderShows(allShows, "");
-        updateCountDisplay(allShows.length, allShows.length, true);
-        showShowsView();
-        
-        // Set initial history state
-        if (!history.state) {
-          history.replaceState({ view: 'shows' }, '', '#shows');
-        }
-      })
-      .catch((e) => {
-        console.error("Shows load failed", e);
-      });
+    try {
+      const shows = await fetchWithCache(url);
+      allShows = shows.sort((a, b) => (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase()));
+      renderShows(allShows, "");
+      updateCountDisplay(allShows.length, allShows.length, true);
+      showShowsView();
+      
+      // Set initial history state
+      if (!history.state) {
+        history.replaceState({ view: 'shows' }, '', '#shows');
+      }
+    } catch (e) {
+      console.error("Shows load failed", e);
+    }
   }
 
   function applyShowSearch() {
