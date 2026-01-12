@@ -184,12 +184,29 @@ function clearExpiredCache() {
 }
 
 async function fetchWithCache(url) {
-  if (fetchCache.has(url)) return fetchCache.get(url);
+  // Check in-memory cache first (fastest)
+  if (fetchCache.has(url)) {
+    return fetchCache.get(url);
+  }
   
+  // Check localStorage (persistent cache)
+  const cachedData = getFromLocalStorage(url);
+  if (cachedData) {
+    const promise = Promise.resolve(cachedData);
+    fetchCache.set(url, promise);
+    return promise;
+  }
+  
+  // Fetch from API
   const promise = (async () => {
     const response = await fetch(url);
     if (!response.ok) throw new Error("Network error");
-    return await response.json();
+    const data = await response.json();
+    
+    // Save to localStorage
+    saveToLocalStorage(url, data);
+    
+    return data;
   })();
   
   fetchCache.set(url, promise);
