@@ -58,9 +58,9 @@ function formatEpisodeCode(season, number) {
 
 function highlightText(text, term) {
   if (!term) return text;
-  const esc = escapeRegExp(term);
-  const re = new RegExp(esc, "gi");
-  return text.replace(re, (match) => `<mark>${match}</mark>`);
+  const escapedTerm = escapeRegExp(term);  // ✅ Was: esc
+  const regex = new RegExp(escapedTerm, "gi");  // ✅ Was: re
+  return text.replace(regex, (match) => `<mark>${match}</mark>`);
 }
 
 function makePageForShow(showData, highlightTerm = "") {
