@@ -124,12 +124,16 @@ function makePageForEpisode(episodeData, highlightTerm = "") {
   return card;
 }
 
-function renderShows(showsArray, highlightTerm = "") {
+function renderShows() {
   const container = document.getElementById("root");
   container.innerHTML = "";
   const frag = document.createDocumentFragment();
-  for (const show of showsArray) frag.appendChild(makePageForShow(show, highlightTerm));
+  const filtered = getFilteredShows();
+  for (const show of filtered) {
+    frag.appendChild(makePageForShow(show, state.searchTerm));
+  }
   container.appendChild(frag);
+  updateCountDisplay(filtered.length, getTotalShows(), true);
 }
 
 function renderEpisodes() {
@@ -256,29 +260,31 @@ function showEpisodesView() {
 }
 
 async function loadEpisodesForShow(showId, showName) {
-  state.currentShowName = showName;
-  state.currentShowId = showId;
+  state.currentShowId = showId; // ✅ Use state
+  state.currentShowName = showName; // ✅ Use state
+  state.episodeSearchTerm = ''; // ✅ Use state
+  state.selectedEpisodeCode = 'all'; // ✅ Use state
+  
   const epUrl = `https://api.tvmaze.com/shows/${showId}/episodes`;
-  renderEpisodes([], "");
-  updateCountDisplay(0, 0);
+  renderEpisodes();
   showEpisodesView();
   
   history.pushState({ view: 'episodes', showId, showName }, '', `#show/${showId}`);
   
   try {
     const episodes = await fetchWithCache(epUrl);
-    state.allEpisodes = Array.isArray(episodes) ? episodes.slice() : [];
-    populateEpisodeSelector(state.allEpisodes);
-    renderEpisodes(getFilteredEpisodes(), state.episodeSearchTerm);
-    updateCountDisplay(getFilteredEpisodes().length, getTotalEpisodes());
+    state.allEpisodes = Array.isArray(episodes) ? episodes.slice() : []; // ✅ Use state
+    populateEpisodeSelector(state.allEpisodes); // ✅ Use state
+    renderEpisodes();
+    
     const searchInput = document.getElementById("search");
     const episodeSelect = document.getElementById("episode-select");
     searchInput.value = "";
     episodeSelect.value = "all";
   } catch (err) {
     console.error("Episodes load failed", err);
-    renderEpisodes([], "");
-    updateCountDisplay(0, 0);
+    state.allEpisodes = []; // ✅ Use state
+    renderEpisodes();
   }
 }
 
@@ -294,9 +300,10 @@ function setup() {
     const url = "https://api.tvmaze.com/shows";
     try {
       const shows = await fetchWithCache(url);
-      state.allShows = shows.sort((a, b) => (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase()));
-      renderShows(getFilteredShows(), state.searchTerm);
-      updateCountDisplay(getFilteredShows().length, getTotalShows(), true);
+      state.allShows = shows.sort((a, b) =>  // ✅ Use state
+        (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase())
+      );
+      renderShows();
       showShowsView();
       
       if (!history.state) {
@@ -308,45 +315,42 @@ function setup() {
   }
 
   function applyShowSearch() {
-    state.searchTerm = showSearchInput.value.trim();
-    renderShows(getFilteredShows(), state.searchTerm);
-    updateCountDisplay(getFilteredShows().length, getTotalShows(), true);
+    state.searchTerm = showSearchInput.value.trim(); // ✅ Use state
+    renderShows();
   }
 
   function applyEpisodeSearch() {
-    state.episodeSearchTerm = searchInput.value.trim();
-    renderEpisodes(getFilteredEpisodes(), state.episodeSearchTerm);
-    updateCountDisplay(getFilteredEpisodes().length, getTotalEpisodes());
-    episodeSelect.value = "all";
+    state.episodeSearchTerm = searchInput.value.trim(); // ✅ Use state
+    state.selectedEpisodeCode = 'all'; // ✅ Use state
+    episodeSelect.value = 'all';
+    renderEpisodes();
   }
 
   showSearchInput.addEventListener("input", applyShowSearch);
   searchInput.addEventListener("input", applyEpisodeSearch);
 
   backButton.addEventListener("click", () => {
-    state.currentView = 'shows';
-    renderShows(getFilteredShows(), state.searchTerm);
-    updateCountDisplay(getFilteredShows().length, getTotalShows(), true);
-    showShowsView();
+    state.searchTerm = ''; // ✅ Use state
     showSearchInput.value = "";
+    renderShows();
+    showShowsView();
     history.pushState({ view: 'shows' }, '', '#shows');
   });
 
   episodeSelect.addEventListener("change", (e) => {
-    state.selectedEpisodeCode = e.target.value;
-    renderEpisodes(getFilteredEpisodes(), state.episodeSearchTerm);
-    updateCountDisplay(getFilteredEpisodes().length, getTotalEpisodes());
+    state.selectedEpisodeCode = e.target.value; // ✅ Use state
+    state.episodeSearchTerm = ''; // ✅ Use state
     searchInput.value = "";
+    renderEpisodes();
   });
 
   window.addEventListener('popstate', (event) => {
     if (event.state) {
       if (event.state.view === 'shows') {
-        state.currentView = 'shows';
-        renderShows(getFilteredShows(), state.searchTerm);
-        updateCountDisplay(getFilteredShows().length, getTotalShows(), true);
-        showShowsView();
+        state.searchTerm = ''; // ✅ Use state
         showSearchInput.value = "";
+        renderShows();
+        showShowsView();
       } else if (event.state.view === 'episodes') {
         loadEpisodesForShow(event.state.showId, event.state.showName);
       }
