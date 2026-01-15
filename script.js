@@ -132,12 +132,16 @@ function renderShows(showsArray, highlightTerm = "") {
   container.appendChild(frag);
 }
 
-function renderEpisodes(episodesArray, highlightTerm = "") {
+function renderEpisodes() {
   const container = document.getElementById("root");
   container.innerHTML = "";
   const frag = document.createDocumentFragment();
-  for (const ep of episodesArray) frag.appendChild(makePageForEpisode(ep, highlightTerm));
+  const filtered = getFilteredEpisodes(); // ✅ Use derived function
+  for (const ep of filtered) {
+    frag.appendChild(makePageForEpisode(ep, state.episodeSearchTerm)); // ✅ Use state
+  }
   container.appendChild(frag);
+  updateCountDisplay(filtered.length, getTotalEpisodes()); // ✅ Use derived
 }
 
 function populateEpisodeSelector(episodes) {
@@ -240,11 +244,13 @@ async function fetchWithCache(url) {
 }
 
 function showShowsView() {
+  state.currentView = 'shows'; // ✅ Update state
   document.getElementById("shows-controls").style.display = "flex";
   document.getElementById("episodes-controls").style.display = "none";
 }
 
 function showEpisodesView() {
+  state.currentView = 'episodes'; // ✅ Update state
   document.getElementById("shows-controls").style.display = "none";
   document.getElementById("episodes-controls").style.display = "flex";
 }
