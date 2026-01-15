@@ -1,8 +1,48 @@
-// Global variables for shared state
-let allShows = [];
-let allEpisodes = [];
-let totalEpisodes = 0;
-let currentShowName = "";
+// Global state - single source of truth
+const state = {
+  allShows: [],
+  allEpisodes: [],
+  currentView: 'shows',
+  currentShowId: null,
+  currentShowName: null,
+  searchTerm: '',
+  episodeSearchTerm: '',
+  selectedEpisodeCode: 'all'
+};
+
+// Derived values - computed from state
+const getTotalEpisodes = () => state.allEpisodes.length;
+const getTotalShows = () => state.allShows.length;
+
+const getFilteredShows = () => {
+  if (!state.searchTerm) return state.allShows;
+  
+  const lower = state.searchTerm.toLowerCase();
+  return state.allShows.filter((show) => {
+    const name = (show.name || "").toLowerCase();
+    const summary = stripHtml(show.summary || "").toLowerCase();
+    const genres = (show.genres || []).join(" ").toLowerCase();
+    return name.includes(lower) || summary.includes(lower) || genres.includes(lower);
+  });
+};
+
+const getFilteredEpisodes = () => {
+  if (state.selectedEpisodeCode !== 'all') {
+    const chosen = state.allEpisodes.find((ep) => 
+      formatEpisodeCode(ep.season, ep.number) === state.selectedEpisodeCode
+    );
+    return chosen ? [chosen] : state.allEpisodes;
+  }
+  
+  if (!state.episodeSearchTerm) return state.allEpisodes;
+  
+  const lower = state.episodeSearchTerm.toLowerCase();
+  return state.allEpisodes.filter((ep) => {
+    const name = (ep.name || "").toLowerCase();
+    const summary = stripHtml(ep.summary || "").toLowerCase();
+    return name.includes(lower) || summary.includes(lower);
+  });
+};
 
 function stripHtml(html) {
   if (!html) return "";
@@ -26,7 +66,6 @@ function highlightText(text, term) {
   return text.replace(re, (match) => `<mark>${match}</mark>`);
 }
 
-// Modified to call global function
 function makePageForShow(showData, highlightTerm = "") {
   const template = document.getElementById("show-template");
   const card = template.content.cloneNode(true);
@@ -48,7 +87,6 @@ function makePageForShow(showData, highlightTerm = "") {
   card.querySelector(".show-rating").textContent = showData.rating?.average || "N/A";
   card.querySelector(".show-runtime").textContent = showData.runtime || "N/A";
 
-  // Add click handler - NOW WORKS because loadEpisodesForShow is global
   const cardElement = card.querySelector(".show-card");
   cardElement.style.cursor = "pointer";
   cardElement.addEventListener("click", () => {
@@ -77,11 +115,9 @@ function makePageForEpisode(episodeData, highlightTerm = "") {
     imgEl.alt = "No image available";
   }
 
-  // Set the link wrapper's href
   const linkWrapper = card.querySelector(".episode-link-wrapper");
   linkWrapper.href = episodeData.url || "#";
   
-  // Add cursor pointer style
   const cardElement = card.querySelector(".episode-card");
   cardElement.style.cursor = "pointer";
 
@@ -124,9 +160,8 @@ function updateCountDisplay(currentCount, total, isShows = false) {
 }
 
 const fetchCache = new Map();
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+const CACHE_DURATION = 24 * 60 * 60 * 1000;
 
-// Save to localStorage with expiration
 function saveToLocalStorage(key, data) {
   try {
     const item = {
@@ -140,7 +175,6 @@ function saveToLocalStorage(key, data) {
   }
 }
 
-// Get from localStorage (returns null if expired or not found)
 function getFromLocalStorage(key) {
   try {
     const item = localStorage.getItem(key);
@@ -148,7 +182,6 @@ function getFromLocalStorage(key) {
     
     const parsed = JSON.parse(item);
     
-    // Check if expired
     if (Date.now() > parsed.expiresAt) {
       localStorage.removeItem(key);
       return null;
@@ -161,7 +194,6 @@ function getFromLocalStorage(key) {
   }
 }
 
-// Clear expired items from localStorage
 function clearExpiredCache() {
   try {
     const keys = Object.keys(localStorage);
@@ -173,9 +205,7 @@ function clearExpiredCache() {
           if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
             localStorage.removeItem(key);
           }
-        } catch (e) {
-          // Not our cache item, skip it
-        }
+        } catch (e) {}
       }
     });
   } catch (e) {
@@ -184,12 +214,10 @@ function clearExpiredCache() {
 }
 
 async function fetchWithCache(url) {
-  // Check in-memory cache first (fastest)
   if (fetchCache.has(url)) {
     return fetchCache.get(url);
   }
   
-  // Check localStorage (persistent cache)
   const cachedData = getFromLocalStorage(url);
   if (cachedData) {
     const promise = Promise.resolve(cachedData);
@@ -197,13 +225,11 @@ async function fetchWithCache(url) {
     return promise;
   }
   
-  // Fetch from API
   const promise = (async () => {
     const response = await fetch(url);
     if (!response.ok) throw new Error("Network error");
     const data = await response.json();
     
-    // Save to localStorage
     saveToLocalStorage(url, data);
     
     return data;
@@ -224,22 +250,21 @@ function showEpisodesView() {
 }
 
 async function loadEpisodesForShow(showId, showName) {
-  currentShowName = showName;
+  state.currentShowName = showName;
+  state.currentShowId = showId;
   const epUrl = `https://api.tvmaze.com/shows/${showId}/episodes`;
   renderEpisodes([], "");
   updateCountDisplay(0, 0);
   showEpisodesView();
   
-  // Add to browser history
   history.pushState({ view: 'episodes', showId, showName }, '', `#show/${showId}`);
   
   try {
     const episodes = await fetchWithCache(epUrl);
-    allEpisodes = Array.isArray(episodes) ? episodes.slice() : [];
-    totalEpisodes = allEpisodes.length;
-    populateEpisodeSelector(allEpisodes);
-    renderEpisodes(allEpisodes, "");
-    updateCountDisplay(allEpisodes.length, totalEpisodes);
+    state.allEpisodes = Array.isArray(episodes) ? episodes.slice() : [];
+    populateEpisodeSelector(state.allEpisodes);
+    renderEpisodes(getFilteredEpisodes(), state.episodeSearchTerm);
+    updateCountDisplay(getFilteredEpisodes().length, getTotalEpisodes());
     const searchInput = document.getElementById("search");
     const episodeSelect = document.getElementById("episode-select");
     searchInput.value = "";
@@ -252,7 +277,6 @@ async function loadEpisodesForShow(showId, showName) {
 }
 
 function setup() {
-  // Clear expired cache on startup
   clearExpiredCache();
   
   const searchInput = document.getElementById("search");
@@ -260,17 +284,15 @@ function setup() {
   const episodeSelect = document.getElementById("episode-select");
   const backButton = document.getElementById("back-to-shows");
 
-  // Load and display shows - NOW USING ASYNC/AWAIT
   async function loadShows() {
     const url = "https://api.tvmaze.com/shows";
     try {
       const shows = await fetchWithCache(url);
-      allShows = shows.sort((a, b) => (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase()));
-      renderShows(allShows, "");
-      updateCountDisplay(allShows.length, allShows.length, true);
+      state.allShows = shows.sort((a, b) => (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase()));
+      renderShows(getFilteredShows(), state.searchTerm);
+      updateCountDisplay(getFilteredShows().length, getTotalShows(), true);
       showShowsView();
       
-      // Set initial history state
       if (!history.state) {
         history.replaceState({ view: 'shows' }, '', '#shows');
       }
@@ -280,83 +302,43 @@ function setup() {
   }
 
   function applyShowSearch() {
-    const term = showSearchInput.value.trim();
-    if (term === "") {
-      renderShows(allShows, "");
-      updateCountDisplay(allShows.length, allShows.length, true);
-      return;
-    }
-    const lower = term.toLowerCase();
-    const filtered = allShows.filter((show) => {
-      const name = (show.name || "").toLowerCase();
-      const summary = stripHtml(show.summary || "").toLowerCase();
-      const genres = (show.genres || []).join(" ").toLowerCase();
-      return name.includes(lower) || summary.includes(lower) || genres.includes(lower);
-    });
-    renderShows(filtered, term);
-    updateCountDisplay(filtered.length, allShows.length, true);
+    state.searchTerm = showSearchInput.value.trim();
+    renderShows(getFilteredShows(), state.searchTerm);
+    updateCountDisplay(getFilteredShows().length, getTotalShows(), true);
   }
 
   function applyEpisodeSearch() {
-    const term = searchInput.value.trim();
-    const total = totalEpisodes || allEpisodes.length;
-    if (term === "") {
-      renderEpisodes(allEpisodes, "");
-      updateCountDisplay(allEpisodes.length, total);
-      episodeSelect.value = "all";
-      return;
-    }
-    const lower = term.toLowerCase();
-    const filtered = allEpisodes.filter((ep) => {
-      const name = (ep.name || "").toLowerCase();
-      const summary = stripHtml(ep.summary || "").toLowerCase();
-      return name.includes(lower) || summary.includes(lower);
-    });
-    renderEpisodes(filtered, term);
-    updateCountDisplay(filtered.length, total);
+    state.episodeSearchTerm = searchInput.value.trim();
+    renderEpisodes(getFilteredEpisodes(), state.episodeSearchTerm);
+    updateCountDisplay(getFilteredEpisodes().length, getTotalEpisodes());
     episodeSelect.value = "all";
   }
 
-  // Event listeners
   showSearchInput.addEventListener("input", applyShowSearch);
   searchInput.addEventListener("input", applyEpisodeSearch);
 
   backButton.addEventListener("click", () => {
-    renderShows(allShows, "");
-    updateCountDisplay(allShows.length, allShows.length, true);
+    state.currentView = 'shows';
+    renderShows(getFilteredShows(), state.searchTerm);
+    updateCountDisplay(getFilteredShows().length, getTotalShows(), true);
     showShowsView();
     showSearchInput.value = "";
-    
-    // Add to browser history
     history.pushState({ view: 'shows' }, '', '#shows');
   });
 
   episodeSelect.addEventListener("change", (e) => {
-    const val = e.target.value;
-    const total = totalEpisodes || allEpisodes.length;
-    if (val === "all") {
-      renderEpisodes(allEpisodes, "");
-      updateCountDisplay(allEpisodes.length, total);
-      searchInput.value = "";
-      return;
-    }
-    const chosen = allEpisodes.find((ep) => formatEpisodeCode(ep.season, ep.number) === val);
-    if (!chosen) {
-      renderEpisodes(allEpisodes, "");
-      updateCountDisplay(allEpisodes.length, total);
-      return;
-    }
-    renderEpisodes([chosen], "");
-    updateCountDisplay(1, total);
+    state.selectedEpisodeCode = e.target.value;
+    renderEpisodes(getFilteredEpisodes(), state.episodeSearchTerm);
+    updateCountDisplay(getFilteredEpisodes().length, getTotalEpisodes());
     searchInput.value = "";
   });
 
-  // Handle browser back/forward buttons
   window.addEventListener('popstate', (event) => {
     if (event.state) {
       if (event.state.view === 'shows') {
-        renderShows(allShows, "");
-        updateCountDisplay(allShows.length, allShows.length, true);
+        state.currentView = 'shows';
+        renderShows(getFilteredShows(), state.searchTerm);
+        updateCountDisplay(getFilteredShows().length, getTotalShows(), true);
         showShowsView();
         showSearchInput.value = "";
       } else if (event.state.view === 'episodes') {
@@ -365,16 +347,13 @@ function setup() {
     }
   });
 
-  // Start by loading shows
   loadShows();
 }
 
 window.addEventListener("load", setup);
 
-// Back to top button functionality
 const backToTopButton = document.getElementById("back-to-top");
 
-// Show/hide button based on scroll position
 window.addEventListener("scroll", () => {
   if (window.pageYOffset > 300) {
     backToTopButton.classList.add("show");
@@ -383,7 +362,6 @@ window.addEventListener("scroll", () => {
   }
 });
 
-// Scroll to top when clicked
 backToTopButton.addEventListener("click", () => {
   window.scrollTo({
     top: 0,
