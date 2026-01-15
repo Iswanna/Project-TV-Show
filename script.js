@@ -175,8 +175,8 @@ function saveToLocalStorage(key, data) {
       expiresAt: Date.now() + CACHE_DURATION
     };
     localStorage.setItem(key, JSON.stringify(item));
-  } catch (e) {
-    console.error('Failed to save to localStorage', e);
+  } catch (storageError) {  // ✅ Specific name
+    console.error('Failed to save to localStorage', storageError);
   }
 }
 
@@ -193,8 +193,8 @@ function getFromLocalStorage(key) {
     }
     
     return parsed.data;
-  } catch (e) {
-    console.error('Failed to get from localStorage', e);
+  } catch (storageError) {  // ✅ Specific name
+    console.error('Failed to get from localStorage', storageError);
     return null;
   }
 }
@@ -202,19 +202,21 @@ function getFromLocalStorage(key) {
 function clearExpiredCache() {
   try {
     const keys = Object.keys(localStorage);
-    keys.forEach(key => {
-      const item = localStorage.getItem(key);
+    keys.forEach(storageKey => {  // ✅ Already updated
+      const item = localStorage.getItem(storageKey);
       if (item) {
         try {
           const parsed = JSON.parse(item);
           if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
-            localStorage.removeItem(key);
+            localStorage.removeItem(storageKey);
           }
-        } catch (e) {}
+        } catch (parseError) {  // ✅ Specific name for JSON parsing
+          // Not our cache item, skip it
+        }
       }
     });
-  } catch (e) {
-    console.error('Failed to clear expired cache', e);
+  } catch (cacheError) {  // ✅ Specific name for cache operations
+    console.error('Failed to clear expired cache', cacheError);
   }
 }
 
@@ -260,25 +262,25 @@ async function loadEpisodesForShow(showId, showName) {
   state.episodeSearchTerm = '';
   state.selectedEpisodeCode = 'all';
   
-  const epUrl = `https://api.tvmaze.com/shows/${showId}/episodes`;
+  const episodesUrl = `https://api.tvmaze.com/shows/${showId}/episodes`;  // ✅ Updated
   renderEpisodes();
   showEpisodesView();
   
   history.pushState({ view: 'episodes', showId, showName }, '', `#show/${showId}`);
   
   try {
-    const episodes = await fetchWithCache(epUrl);
-    state.allEpisodes = Array.isArray(episodes) ? episodes.slice() : []; // ✅ Use state
-    populateEpisodeSelector(state.allEpisodes); // ✅ Use state
+    const episodes = await fetchWithCache(episodesUrl);  // ✅ Updated
+    state.allEpisodes = Array.isArray(episodes) ? episodes.slice() : [];
+    populateEpisodeSelector(state.allEpisodes);
     renderEpisodes();
     
     const searchInput = document.getElementById("search");
     const episodeSelect = document.getElementById("episode-select");
     searchInput.value = "";
     episodeSelect.value = "all";
-  } catch (err) {
-    console.error("Episodes load failed", err);
-    state.allEpisodes = []; // ✅ Use state
+  } catch (fetchError) {  // ✅ Specific name for fetch errors
+    console.error("Episodes load failed", fetchError);
+    state.allEpisodes = [];
     renderEpisodes();
   }
 }
@@ -295,7 +297,7 @@ function setup() {
     const url = "https://api.tvmaze.com/shows";
     try {
       const shows = await fetchWithCache(url);
-      state.allShows = shows.sort((a, b) =>  // ✅ Use state
+      state.allShows = shows.sort((a, b) => 
         (a.name || "").toLowerCase().localeCompare((b.name || "").toLowerCase())
       );
       renderShows();
@@ -304,8 +306,8 @@ function setup() {
       if (!history.state) {
         history.replaceState({ view: 'shows' }, '', '#shows');
       }
-    } catch (e) {
-      console.error("Shows load failed", e);
+    } catch (fetchError) {  // ✅ Specific name for fetch errors
+      console.error("Shows load failed", fetchError);
     }
   }
 
