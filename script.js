@@ -1,10 +1,7 @@
-// Global state - single source of truth
 const state = {
   allShows: [],
   allEpisodes: [],
   currentView: 'shows',
-  currentShowId: null,
-  currentShowName: null,
   searchTerm: '',
   episodeSearchTerm: '',
   selectedEpisodeCode: 'all'
@@ -260,10 +257,8 @@ function showEpisodesView() {
 }
 
 async function loadEpisodesForShow(showId, showName) {
-  state.currentShowId = showId; // ✅ Use state
-  state.currentShowName = showName; // ✅ Use state
-  state.episodeSearchTerm = ''; // ✅ Use state
-  state.selectedEpisodeCode = 'all'; // ✅ Use state
+  state.episodeSearchTerm = '';
+  state.selectedEpisodeCode = 'all';
   
   const epUrl = `https://api.tvmaze.com/shows/${showId}/episodes`;
   renderEpisodes();
