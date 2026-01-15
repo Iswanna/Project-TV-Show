@@ -70,13 +70,13 @@ function makePageForShow(showData, highlightTerm = "") {
   card.querySelector(".episode-title").innerHTML = highlightText(showData.name, highlightTerm);
   card.querySelector(".episode-summary").innerHTML = `<p>${highlightText(stripHtml(showData.summary || "No summary available."), highlightTerm)}</p>`;
 
-  const imgEl = card.querySelector(".episode-image");
+  const imageElement = card.querySelector(".episode-image");  // ✅ Was: imgEl
   if (showData.image && (showData.image.medium || showData.image.original)) {
-    imgEl.src = showData.image.medium || showData.image.original;
-    imgEl.alt = `${showData.name} image`;
+    imageElement.src = showData.image.medium || showData.image.original;
+    imageElement.alt = `${showData.name} image`;
   } else {
-    imgEl.removeAttribute("src");
-    imgEl.alt = "No image available";
+    imageElement.removeAttribute("src");
+    imageElement.alt = "No image available";
   }
 
   card.querySelector(".show-genres").textContent = showData.genres?.join(", ") || "N/A";
@@ -103,13 +103,13 @@ function makePageForEpisode(episodeData, highlightTerm = "") {
 
   card.querySelector(".episode-summary").innerHTML = `<p>${highlightText(stripHtml(episodeData.summary || "No summary available."), highlightTerm)}</p>`;
 
-  const imgEl = card.querySelector(".episode-image");
+  const imageElement = card.querySelector(".episode-image");  // ✅ Was: imgEl
   if (episodeData.image && (episodeData.image.medium || episodeData.image.original)) {
-    imgEl.src = episodeData.image.medium || episodeData.image.original;
-    imgEl.alt = `${episodeData.name} image`;
+    imageElement.src = episodeData.image.medium || episodeData.image.original;
+    imageElement.alt = `${episodeData.name} image`;
   } else {
-    imgEl.removeAttribute("src");
-    imgEl.alt = "No image available";
+    imageElement.removeAttribute("src");
+    imageElement.alt = "No image available";
   }
 
   const linkWrapper = card.querySelector(".episode-link-wrapper");
