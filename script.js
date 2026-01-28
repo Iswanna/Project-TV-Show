@@ -343,14 +343,19 @@ function showEpisodesView() {
   document.getElementById("episodes-controls").style.display = "flex";
 }
 
+/**
+ * [11] LOAD EPISODES (THE "DRILL DOWN")
+ * Runs when a user clicks a show card.
+ */
 async function loadEpisodesForShow(showId, showName) {
   state.episodeSearchTerm = "";
   state.selectedEpisodeCode = "all";
 
-  const episodesUrl = `https://api.tvmaze.com/shows/${showId}/episodes`; // ✅ Updated
-  renderEpisodes();
-  showEpisodesView();
+  const episodesUrl = `https://api.tvmaze.com/shows/${showId}/episodes`;
+  renderEpisodes(); // Show blank/loading state
+  showEpisodesView(); // Swap search bars
 
+  // Update the URL in the browser (e.g., mysite.com/#show/123)
   history.pushState(
     { view: "episodes", showId, showName },
     "",
@@ -360,22 +365,27 @@ async function loadEpisodesForShow(showId, showName) {
   try {
     const episodes = await fetchWithCache(episodesUrl); // ✅ Updated
     state.allEpisodes = Array.isArray(episodes) ? episodes.slice() : [];
-    populateEpisodeSelector(state.allEpisodes);
-    renderEpisodes();
+    populateEpisodeSelector(state.allEpisodes); // Fill dropdown
+    renderEpisodes(); // Draw episodes
 
+    // Reset search UI
     const searchInput = document.getElementById("search");
     const episodeSelect = document.getElementById("episode-select");
     searchInput.value = "";
     episodeSelect.value = "all";
   } catch (fetchError) {
-    // ✅ Specific name for fetch errors
     console.error("Episodes load failed", fetchError);
     state.allEpisodes = [];
     renderEpisodes();
   }
 }
 
+/**
+ * [12] SETUP (THE ORCHESTRATOR)
+ * This function wires everything together once the page is ready.
+ */
 function setup() {
+  // [14] Clean up old data
   clearExpiredCache();
 
   const searchInput = document.getElementById("search");
@@ -383,15 +393,19 @@ function setup() {
   const episodeSelect = document.getElementById("episode-select");
   const backButton = document.getElementById("back-to-shows");
 
+  // [16] Sub-function to handle initial show loading
   async function loadShows() {
     const url = "https://api.tvmaze.com/shows";
     try {
+      // [18] Get data
       const shows = await fetchWithCache(url);
+      // [19] Sort A-Z
       state.allShows = shows.sort((a, b) =>
         (a.name || "")
           .toLowerCase()
           .localeCompare((b.name || "").toLowerCase()),
       );
+      // [20] Draw the page
       renderShows();
       showShowsView();
 
@@ -403,7 +417,7 @@ function setup() {
       console.error("Shows load failed", fetchError);
     }
   }
-
+  // [17] Define what happens when users type in search boxes
   function applyShowSearch() {
     state.searchTerm = showSearchInput.value.trim(); // ✅ Use state
     renderShows();
@@ -416,11 +430,12 @@ function setup() {
     renderEpisodes();
   }
 
+  // [21] Attach the listeners to the HTML elements
   showSearchInput.addEventListener("input", applyShowSearch);
   searchInput.addEventListener("input", applyEpisodeSearch);
 
   backButton.addEventListener("click", () => {
-    state.searchTerm = ""; // ✅ Use state
+    state.searchTerm = "";
     showSearchInput.value = "";
     renderShows();
     showShowsView();
@@ -428,16 +443,17 @@ function setup() {
   });
 
   episodeSelect.addEventListener("change", (e) => {
-    state.selectedEpisodeCode = e.target.value; // ✅ Use state
-    state.episodeSearchTerm = ""; // ✅ Use state
+    state.selectedEpisodeCode = e.target.value;
+    state.episodeSearchTerm = "";
     searchInput.value = "";
     renderEpisodes();
   });
 
+  // Handles the browser's Back and Forward buttons
   window.addEventListener("popstate", (event) => {
     if (event.state) {
       if (event.state.view === "shows") {
-        state.searchTerm = ""; // ✅ Use state
+        state.searchTerm = "";
         showSearchInput.value = "";
         renderShows();
         showShowsView();
@@ -447,14 +463,25 @@ function setup() {
     }
   });
 
+  // [22] KICK OFF THE APP: Start loading shows
   loadShows();
 }
 
+/**
+ * [13] THE TRIGGER
+ * The very first piece of code that "fires."
+ * It tells the browser: "Don't do anything until the HTML is fully loaded."
+ */
 window.addEventListener("load", setup);
 
+/**
+ * [23] SCROLL TO TOP FEATURE
+ * Independent logic for the "Back to top" button.
+ */
 const backToTopButton = document.getElementById("back-to-top");
 
 window.addEventListener("scroll", () => {
+  // Show button only if user scrolled down 300 pixels
   if (window.pageYOffset > 300) {
     backToTopButton.classList.add("show");
   } else {
