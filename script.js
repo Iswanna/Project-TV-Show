@@ -419,13 +419,13 @@ function setup() {
   }
   // [17] Define what happens when users type in search boxes
   function applyShowSearch() {
-    state.searchTerm = showSearchInput.value.trim(); // ✅ Use state
+    state.searchTerm = showSearchInput.value.trim();
     renderShows();
   }
 
   function applyEpisodeSearch() {
-    state.episodeSearchTerm = searchInput.value.trim(); // ✅ Use state
-    state.selectedEpisodeCode = "all"; // ✅ Use state
+    state.episodeSearchTerm = searchInput.value.trim();
+    state.selectedEpisodeCode = "all";
     episodeSelect.value = "all";
     renderEpisodes();
   }
