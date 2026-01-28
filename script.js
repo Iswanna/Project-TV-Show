@@ -187,11 +187,16 @@ function makePageForEpisode(episodeData, highlightTerm = "") {
 function renderShows() {
   const container = document.getElementById("root");
   container.innerHTML = ""; // Clear existing content
-  const frag = document.createDocumentFragment(); // Use a fragment for better performance
+  const frag = document.createDocumentFragment(); // This is your "Invisible Tray"
   const filtered = getFilteredShows();
   for (const show of filtered) {
+    // You are adding shows to the INVISIBLE tray,
+    // so the browser DOES NOT have to repaint yet.
     frag.appendChild(makePageForShow(show, state.searchTerm));
   }
+
+  // You add the whole tray to the live page.
+  // The browser only has to Reflow and Repaint ONCE.
   container.appendChild(frag); // Add all shows to the page at once
   updateCountDisplay(filtered.length, getTotalShows(), true);
 }
